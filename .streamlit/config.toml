@@ -7,6 +7,7 @@ font = "sans serif"
 
 [client]
 showErrorDetails = true
+toolbarMode = "viewer"
 
 [logger]
 level = "error"
@@ -17,10 +18,6 @@ runOnSave = true
 port = 8501
 enableXsrfProtection = true
 maxUploadSize = 200
-timeout = 300
-
-[client.toolbarMode]
-toolbarMode = "viewer"
 
 
 
