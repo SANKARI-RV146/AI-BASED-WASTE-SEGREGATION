@@ -13,6 +13,21 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from config import WASTE_CATEGORIES, MODEL_CONFIG
 
+# Suppress TensorFlow warnings
+import warnings
+warnings.filterwarnings('ignore')
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+
+@st.cache_resource
+def load_inception_model():
+    """Load pre-trained InceptionV3 model (cached)"""
+    try:
+        model = InceptionV3(weights='imagenet')
+        return model
+    except Exception as e:
+        st.error(f"❌ Error loading model: {str(e)}")
+        return None
+
 class WasteClassifier:
     def __init__(self):
         self.model = None
@@ -21,9 +36,10 @@ class WasteClassifier:
         """Load pre-trained InceptionV3 model"""
         try:
             if self.model is None:
-                st.info("📥 Loading AI model for the first time (this may take a moment)...")
-                self.model = InceptionV3(weights='imagenet')
-                st.success("✅ Model loaded successfully!")
+                st.info("📥 Loading AI model (this may take 30-60 seconds on first run)...")
+                self.model = load_inception_model()
+                if self.model:
+                    st.success("✅ Model loaded successfully!")
             return self.model
         except Exception as e:
             st.error(f"❌ Error loading model: {str(e)}")

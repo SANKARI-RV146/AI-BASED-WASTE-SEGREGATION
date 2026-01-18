@@ -50,7 +50,12 @@ st.set_page_config(
 )
 
 # ===== INITIALIZE CLASSIFIER =====
-classifier = WasteClassifier()
+@st.cache_resource
+def init_classifier():
+    """Initialize classifier (cached)"""
+    return WasteClassifier()
+
+classifier = init_classifier()
 
 # ===== MAIN APP =====
 def main():
@@ -87,7 +92,7 @@ def main():
             with col2:
                 if st.button("🔍 Analyze", use_container_width=True, key="analyze_single"):
                     try:
-                        with st.spinner("Analyzing image..."):
+                        with st.spinner("⏳ First time? Model is loading (30-60 seconds)..."):
                             prediction, confidence, all_predictions = classifier.classify_image(image)
                             
                             if prediction and confidence >= 10:
