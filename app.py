@@ -90,9 +90,9 @@ def main():
                         with st.spinner("⏳ Analyzing image..."):
                             prediction, confidence, all_predictions = classifier.classify_image(image)
                             
-                            if prediction and confidence >= 10:
+                            if prediction and confidence > 0.5:  # 50% confidence threshold
                                 waste_type, bin_info = classifier.get_waste_category(prediction)
-                                display_single_result(prediction, confidence, waste_type, bin_info)
+                                display_single_result(prediction, confidence * 100, waste_type, bin_info)
                                 
                                 # Show all predictions
                                 with st.expander("📋 All Predictions"):
@@ -135,13 +135,13 @@ def main():
                     image = Image.open(uploaded_file)
                     prediction, confidence, _ = classifier.classify_image(image)
                     
-                    if prediction and confidence >= 10:
+                    if prediction and confidence > 0.5:  # 50% confidence threshold
                         waste_type, bin_info = classifier.get_waste_category(prediction)
                         segregated[bin_info["bin"]].append({
                             "image": image,
                             "name": uploaded_file.name,
                             "prediction": prediction,
-                            "confidence": confidence,
+                            "confidence": confidence * 100,
                             "waste_type": waste_type
                         })
                     
