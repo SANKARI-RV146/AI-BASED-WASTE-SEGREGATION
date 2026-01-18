@@ -43,7 +43,9 @@ class WasteClassifier:
             
             if predictions:
                 top_pred = predictions[0]
-                return top_pred[0], top_pred[1], predictions
+                label = top_pred[1]  # Get the label from the tuple
+                confidence = top_pred[2]
+                return label, confidence, predictions
             
             return None, 0, []
             
@@ -124,54 +126,3 @@ class WasteClassifier:
         
         return "Non-Recyclable", WASTE_CATEGORIES["Non-Recyclable"]
 
-    
-    def classify_image(self, image):
-        """Classify a single image"""
-        try:
-            st.info("🔄 Preparing image...")
-            
-            # Prepare image
-            img_array = np.array(image.convert('RGB'))
-            img_size = MODEL_CONFIG["input_size"]
-            img_resized = tf.image.resize(img_array, [img_size, img_size]).numpy()
-            img_batch = np.expand_dims(img_resized, axis=0)
-            img_preprocessed = preprocess_input(img_batch)
-            
-            st.info("🤖 Running prediction...")
-            
-            # Get predictions
-            model = self.load_model()
-            if model is None:
-                return None, 0, "Failed to load model"
-            
-            predictions = model.predict(img_preprocessed, verbose=0)
-            decoded = decode_predictions(predictions, top=MODEL_CONFIG["top_predictions"])[0]
-            
-            st.success("✅ Prediction complete!")
-            
-            # Filter predictions with confidence threshold
-            threshold = MODEL_CONFIG["confidence_threshold"]
-            high_confidence = [p for p in decoded if float(p[2]) * 100 > threshold]
-            
-            if not high_confidence:
-                return None, 0, []
-            
-            top_prediction = high_confidence[0][1]
-            confidence = float(high_confidence[0][2]) * 100
-            
-            return top_prediction, confidence, decoded
-        except Exception as e:
-            st.error(f"❌ Classification error: {str(e)}")
-            import traceback
-            traceback.print_exc()
-            return None, 0, str(e)
-    
-    def get_waste_category(self, prediction):
-        """Map prediction to waste category"""
-        pred_lower = prediction.lower()
-        
-        for category, details in WASTE_CATEGORIES.items():
-            if any(word in pred_lower for word in details["keywords"]):
-                return category, details
-        
-        return "Non-Recyclable", WASTE_CATEGORIES["Non-Recyclable"]
